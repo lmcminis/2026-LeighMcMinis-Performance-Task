@@ -46,24 +46,24 @@ public class GrabberSubsystem extends SubsystemBase{
         inputs.appliedVoltage[1] = volts;
     }
 
-    public Command intakeCommand() {
+    public Command intakeCommand(double leftVoltage, double rightVoltage) {
         return run(() -> { 
-        io.setLeftVoltage(GrabberConstants.kIntakeVoltage);
-        io.setRightVoltage(GrabberConstants.kIntakeVoltage);
+        io.setLeftVoltage(leftVoltage);
+        io.setRightVoltage(rightVoltage);
         }).finallyDo(interrupted -> io.stop());
     }
 
-    public Command holdCommand() {
+    public Command holdCommand(double leftVoltage, double rightVoltage) {
         return run(() -> { 
-        io.setLeftVoltage(GrabberConstants.kHoldVoltage);
-        io.setRightVoltage(GrabberConstants.kHoldVoltage);
+        io.setLeftVoltage(leftVoltage);
+        io.setRightVoltage(rightVoltage);
         }).finallyDo(interrupted -> io.stop());
     }
 
-    public Command releaseCommand() {
+    public Command releaseCommand(double leftVoltage, double rightVoltage) {
         return run(() -> { 
-        io.setLeftVoltage(GrabberConstants.kReleaseVoltage);
-        io.setRightVoltage(GrabberConstants.kReleaseVoltage);
+        io.setLeftVoltage(leftVoltage);
+        io.setRightVoltage(rightVoltage);
         }).withTimeout(0.3).andThen(runOnce (io::stop));
     }
     

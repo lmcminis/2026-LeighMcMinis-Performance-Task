@@ -20,36 +20,76 @@ import frc.robot.subsystems.grabber.GrabberSubsystem;
 import frc.robot.subsystems.pivot.PivotSubsystem;
 
 public class Superstructure {
-    
 
-    public class SuperstructureStates {
-        public enum elevatorState{
-            
-        };
+    private final ElevatorSubsystem m_elevator;
+    private final GrabberSubsystem m_grabber;
+    private final PivotSubsystem m_pivot;
 
-        public enum grabberState {
-            INTAKE,
-            HOLD,
-            RELEASE
-        };
+    public Superstructure(ElevatorSubsystem elevator, GrabberSubsystem grabber, PivotSubsystem pivot) {
+        this.m_elevator = elevator;
+        this.m_grabber = grabber;
+        this.m_pivot = pivot;
 
-        public enum pivotState{
-            
-        };
     }
 
-    public record SuperstructureParts(double heightMeters, double pivotRadians, double rollerVolts) {
-        public boolean rollersActive() {
-            return Math.abs(rollerVolts) > 0.05;
-        }
+    public ElevatorSubsystem getElevatorSubsystem() {
+        return m_elevator;
     }
 
-    public enum State {
-        L1 (new SuperstructureParts(1, (Math.PI / 6), GrabberConstants.kPeakForwardVoltage / 3)),
-        L2 (new SuperstructureParts(2, -(Math.PI / 6), GrabberConstants.kPeakForwardVoltage / 3)),
-        L3 (new SuperstructureParts(3, -(Math.PI / 6), GrabberConstants.kPeakForwardVoltage / 3)),
-        L4 (new SuperstructureParts(4, -(Math.PI / 3), GrabberConstants.kPeakForwardVoltage / 3)),
-        Human_Player_Intake(new SuperstructureParts(1.5, (Math.PI / 3), GrabberConstants.kPeakForwardVoltage / 3)),
+    public GrabberSubsystem getGrabberSubsystem() {
+        return m_grabber;
+    }
+
+    public PivotSubsystem getPivotSubsystem() {
+        return m_pivot;
+    }
+
+    public enum States {
+        L1,
+        L2,
+        L3,
+        L4,
+        Intake,
+        Throw
+    }
+
+    public Command L1() {
+        return Commands.sequence(
+            m_pivot.setAngle(Math.PI / 6.0),
+            m_elevator.setPosition(1),
+            m_grabber.releaseCommand(4, -4)
+        );
+    }
+
+    public Command L2() {
+        return Commands.parallel(
+            m_pivot.setAngle(-1 * (Math.PI / 6.0)),
+            m_elevator.setPosition(2),
+            m_grabber.releaseCommand(4,4)
+        );
+    }
+
+    public Command L3() {
+        return Commands.parallel(
+            m_pivot.setAngle(-1 * (Math.PI / 6.0)),
+            m_elevator.setPosition(3),
+            m_grabber.releaseCommand(4,4)
+        );
+    }
+
+    public Command L4() {
+        return Commands.sequence(
+            m_pivot.setAngle(-1 * (Math.PI / 3.0)),
+            m_elevator.setPosition(4),
+            m_grabber.releaseCommand(4,4)
+        );
+    }
+
+    public Command Intake() {
+        
+    }
+
+    public Command Throw() {
         
     }
 
