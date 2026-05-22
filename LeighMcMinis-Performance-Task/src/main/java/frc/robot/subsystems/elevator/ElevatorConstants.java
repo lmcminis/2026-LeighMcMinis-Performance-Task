@@ -1,8 +1,8 @@
 package frc.robot.subsystems.elevator;
 
 public class ElevatorConstants {
-    public static final int kLeaderMotorPort = 0;
-    public static final int kFollowerMotorPort = 0;
+    public static final int kLeaderID = 0;
+    public static final int kFollowerID = 0;
     //public static final CANBus kCANBus = CANConstants.kRioBus;
 
     public static final double kSupplyCurrentLimit = 40;
