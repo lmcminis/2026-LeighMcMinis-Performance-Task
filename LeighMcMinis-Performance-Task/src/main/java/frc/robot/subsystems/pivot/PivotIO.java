@@ -3,8 +3,8 @@ package frc.robot.subsystems.pivot;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface PivotIO {
-    @AutoLog
 
+    @AutoLog
     public static class PivotIOInputs {
         public double appliedVoltage = 0;
         public double currentAmps = 0;

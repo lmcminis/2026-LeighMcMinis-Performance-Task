@@ -23,7 +23,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.subsystems.elevator.ElevatorConstants;
 
 public class PivotIOKraken implements PivotIO {
     // creation
@@ -45,17 +44,17 @@ public class PivotIOKraken implements PivotIO {
         // cancoder plus config
         CANcoderConfiguration m_cancoderConfig = new CANcoderConfiguration(); // set cancoder so horizontal axis becomes zero line for rotations
         m_cancoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5; // 0.5 rotations becomes max number, now goes from -0.5 to 0.5
-        m_cancoderConfig.MagnetSensor.withSensorDirection(SensorDirectionValue.CounterClockwise_Positive); // makes positive direction up
+        m_cancoderConfig.MagnetSensor.withSensorDirection(SensorDirectionValue.CounterClockwise_Positive); // makes positive direction up. assuming motor on right?
         m_cancoderConfig.MagnetSensor.MagnetOffset = PivotConstants.kCANcoderMagnetOffset; // needs physical mechanism to zero sensor
         m_cancoder.getConfigurator().apply(m_cancoderConfig);
 
         // motor plus config
 
         TalonFXConfiguration m_config = new TalonFXConfiguration();
-        m_config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+        m_config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder; // only free cancoder combo option
         m_config.Feedback.FeedbackRemoteSensorID = PivotConstants.kCANcoderID;
-        m_config.Feedback.SensorToMechanismRatio = PivotConstants.kMotorToPivotRatio; 
-        m_config.Feedback.RotorToSensorRatio = PivotConstants.kMotorToPivotRatio;
+        m_config.Feedback.SensorToMechanismRatio = PivotConstants.kSensorToMechanismRatio; // ratio of axle turns to sensor turns, one
+        m_config.Feedback.RotorToSensorRatio = PivotConstants.kMotorToPivotRatio; // based on gearbox, how many motor rotations make one pivot rotation
 
         // feedforward!! (we all scream in unison)
         m_config.Slot0.kS = PivotConstants.kS;
@@ -67,7 +66,7 @@ public class PivotIOKraken implements PivotIO {
         m_config.Slot0.kD = PivotConstants.kD;
         m_config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
-        // soft limits
+        // soft limits / don't brek
         m_config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
         m_config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = PivotConstants.kForwardPositionLimit;
         m_config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
@@ -81,17 +80,25 @@ public class PivotIOKraken implements PivotIO {
         m_velocitySignal = m_motor.getVelocity();
         m_motorPositionSignal = m_motor.getPosition();
     
+        // set motion magic settings
+        var motionMagicConfigs = m_config.MotionMagic;
+        motionMagicConfigs.MotionMagicCruiseVelocity = PivotConstants.MotionMagicCruiseVelocity;
+        motionMagicConfigs.MotionMagicAcceleration = PivotConstants.MotionMagicAcceleration;
+        motionMagicConfigs.MotionMagicJerk = PivotConstants.MotionMagicJerk; 
+
+        m_motor.getConfigurator().apply(m_config);
     }
 
     @Override
     public void setAngleRadians(double angleRadians) {
-        m_positionRequest.withPosition(angleRadians / (2.0 * Math.PI));
+        m_positionRequest.withPosition(angleRadians / (2.0 * Math.PI)); // uses magic motion *sparkles*
         m_motor.setControl(m_positionRequest);
 
     }
 
     @Override
     public void setVoltage(double volts) {
+        // really only used for stop
         m_voltageRequest.withOutput(volts);
         m_motor.setControl(m_voltageRequest);
 

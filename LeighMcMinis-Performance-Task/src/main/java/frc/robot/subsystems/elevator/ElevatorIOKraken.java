@@ -38,4 +38,20 @@ public class ElevatorIOKraken implements ElevatorIO{
         TalonFXConfiguration config = new TalonFXConfiguration();
 
     }
+
+    public void updateInputs(ElevatorIOInputs inputs){
+
+    }
+
+    public void setPosition(double heightMeters){
+
+    }
+
+    public void setVoltage(double appliedVoltage){
+
+    }
+
+    public void stop(){
+        
+    }
 }
