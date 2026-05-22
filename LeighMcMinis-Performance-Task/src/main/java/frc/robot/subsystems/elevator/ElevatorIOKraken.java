@@ -26,32 +26,152 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.subsystems.elevator.ElevatorConstants;
+import frc.robot.subsystems.pivot.PivotConstants;
 
 public class ElevatorIOKraken implements ElevatorIO{
-    private final TalonFX leader = new TalonFX(ElevatorConstants.kLeaderID);
-    private final TalonFX follower = new TalonFX(ElevatorConstants.kFollowerID);
+    // creation
+    private final TalonFX m_leader = new TalonFX(ElevatorConstants.kLeaderID);
+    private final TalonFX m_follower = new TalonFX(ElevatorConstants.kFollowerID);
 
-    private final MotionMagicVoltage positionRequest = new MotionMagicVoltage(0).withSlot(0);
-    private final VoltageOut voltageRequest = new VoltageOut(0);
+    // magic motion
+    private final MotionMagicVoltage m_positionRequest = new MotionMagicVoltage(0).withSlot(0);
+    private final VoltageOut m_voltageRequest = new VoltageOut(0);
+    private final Follower m_followerRequest = new Follower(ElevatorConstants.kLeaderID, ElevatorConstants.kFollowerAlignment);
+
+    // status signals
+    private final StatusSignal<Voltage> m_leadVoltageSignal;
+    private final StatusSignal<AngularVelocity> m_leadVelocitySignal;
+    private final StatusSignal<Current> m_leadCurrentSignal;
+    private final StatusSignal<Current> m_leadStatorCurrentSignal;
+    private final StatusSignal<Temperature> m_leadTemperatureSignal;
+    private final StatusSignal<Angle> m_leadPositionSignal;
+    private final StatusSignal<Voltage> m_followVoltageSignal;
+    private final StatusSignal<AngularVelocity> m_followVelocitySignal;
+    private final StatusSignal<Current> m_followCurrentSignal;
+    private final StatusSignal<Current> m_followStatorCurrentSignal;
+    private final StatusSignal<Temperature> m_followTemperatureSignal;
+    private final StatusSignal<Angle> m_followPositionSignal;
 
     public ElevatorIOKraken() {
-        TalonFXConfiguration config = new TalonFXConfiguration();
+        TalonFXConfiguration m_config = new TalonFXConfiguration();
 
+        m_config.Feedback.SensorToMechanismRatio = ElevatorConstants.kSensorToMechanismRatio;
+        m_config.MotorOutput.Inverted = ElevatorConstants.kInverted;
+        m_config.MotorOutput.NeutralMode = ElevatorConstants.kNeutralMode;
+
+
+        // feedforward!! (we all scream in unison)
+        m_config.Slot0.kS = PivotConstants.kS;
+        m_config.Slot0.kV = PivotConstants.kV; 
+        m_config.Slot0.kA = PivotConstants.kA;
+        m_config.Slot0.kG = PivotConstants.kG;
+        m_config.Slot0.kP = PivotConstants.kP;
+        m_config.Slot0.kI = PivotConstants.kI;
+        m_config.Slot0.kD = PivotConstants.kD;
+        m_config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
+
+        // voltage and current limits
+        m_config.Voltage.PeakForwardVoltage = ElevatorConstants.kPeakForwardVoltage;
+        m_config.Voltage.PeakReverseVoltage = -ElevatorConstants.kPeakReverseVoltage;
+        m_config.CurrentLimits.SupplyCurrentLimit = ElevatorConstants.kSupplyCurrentLimit;
+        m_config.CurrentLimits.SupplyCurrentLimitEnable = true;
+        m_config.CurrentLimits.StatorCurrentLimit = ElevatorConstants.kStatorCurrentLimit;
+        m_config.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+
+        // soft limits / don't brek
+        m_config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        m_config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = ElevatorConstants.kForwardPositionLimit;
+        m_config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        m_config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = ElevatorConstants.kBackwardPositionLimit;
+
+        // status signal setup
+
+        m_leadVoltageSignal = m_leader.getMotorVoltage();
+        m_followVoltageSignal = m_follower.getMotorVoltage();
+        m_leadCurrentSignal = m_leader.getTorqueCurrent();
+        m_leadStatorCurrentSignal = m_leader.getStatorCurrent();
+        m_followCurrentSignal = m_follower.getTorqueCurrent();
+        m_followStatorCurrentSignal = m_follower.getStatorCurrent();
+        m_leadTemperatureSignal = m_leader.getDeviceTemp();
+        m_followTemperatureSignal = m_follower.getDeviceTemp();
+        m_leadVelocitySignal = m_leader.getVelocity();
+        m_followVelocitySignal = m_follower.getVelocity();
+        m_leadPositionSignal = m_leader.getPosition();
+        m_followPositionSignal = m_follower.getPosition();
+    
+        // set motion magic settings
+        var motionMagicConfigs = m_config.MotionMagic;
+        motionMagicConfigs.MotionMagicCruiseVelocity = PivotConstants.MotionMagicCruiseVelocity;
+        motionMagicConfigs.MotionMagicAcceleration = PivotConstants.MotionMagicAcceleration;
+        motionMagicConfigs.MotionMagicJerk = PivotConstants.MotionMagicJerk; 
+
+        m_leader.getConfigurator().apply(m_config);
+        m_follower.getConfigurator().apply(m_config);
+        m_leader.optimizeBusUtilization();
+
+        m_follower.setControl(m_followerRequest);
     }
 
+    @Override
     public void updateInputs(ElevatorIOInputs inputs){
+        StatusSignal.refreshAll(
+            m_leadVoltageSignal,
+            m_followVoltageSignal,
+            m_leadCurrentSignal,
+            m_leadStatorCurrentSignal,
+            m_followCurrentSignal,
+            m_followStatorCurrentSignal,
+            m_leadTemperatureSignal,
+            m_followTemperatureSignal,
+            m_leadVelocitySignal,
+            m_followVelocitySignal,
+            m_leadPositionSignal,
+            m_followPositionSignal
+        );
+
+        inputs.appliedVoltage[1] = m_leadVoltageSignal.getValueAsDouble();
+        inputs.appliedVoltage[2] = m_followVoltageSignal.getValueAsDouble();
+        inputs.currentAmps[1] = m_leadCurrentSignal.getValueAsDouble();
+        inputs.currentAmps[2] = m_followCurrentSignal.getValueAsDouble();
+        inputs.statorCurrentAmps[1] = m_leadStatorCurrentSignal.getValueAsDouble();
+        inputs.statorCurrentAmps[2] = m_followStatorCurrentSignal.getValueAsDouble();
+        inputs.motorTempDegreesC[1] = m_leadTemperatureSignal.getValueAsDouble();
+        inputs.motorTempDegreesC[2] = m_followTemperatureSignal.getValueAsDouble();
+        inputs.velocityMetersPerSecond = rotationsToMeters(m_leadVelocitySignal.getValueAsDouble());
+        inputs.positionMeters = rotationsToMeters(m_leadPositionSignal.getValueAsDouble());
 
     }
 
+    @Override
     public void setPosition(double heightMeters){
-
+        m_positionRequest.withPosition(heightMeters);
+        m_leader.setControl(m_positionRequest);
     }
 
-    public void setVoltage(double appliedVoltage){
-
+    @Override
+    public void setVoltage(double volts){
+        // really only used for stop
+        m_voltageRequest.withOutput(volts);
+        m_leader.setControl(m_voltageRequest);
     }
 
+    @Override
+    public void resetEncoder() { 
+        m_leader.setPosition(0);
+    }
+
+    @Override
     public void stop(){
-        
+        setVoltage(0);
+    }
+
+    
+    private static double rotationsToMeters(double rotations) { 
+        return rotations * ElevatorConstants.kMetersPerDrumRotation; 
+    }
+
+    private static double metersToRotations(double meters) { 
+        return meters  / ElevatorConstants.kMetersPerDrumRotation;
     }
 }

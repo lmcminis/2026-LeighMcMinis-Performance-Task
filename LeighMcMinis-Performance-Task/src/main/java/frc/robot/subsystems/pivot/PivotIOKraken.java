@@ -44,7 +44,7 @@ public class PivotIOKraken implements PivotIO {
         // cancoder plus config
         CANcoderConfiguration m_cancoderConfig = new CANcoderConfiguration(); // set cancoder so horizontal axis becomes zero line for rotations
         m_cancoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5; // 0.5 rotations becomes max number, now goes from -0.5 to 0.5
-        m_cancoderConfig.MagnetSensor.withSensorDirection(SensorDirectionValue.CounterClockwise_Positive); // makes positive direction up. assuming motor on right?
+        m_cancoderConfig.MagnetSensor.withSensorDirection(PivotConstants.kSensorDirection); // makes positive direction up, depends on sensor orientation
         m_cancoderConfig.MagnetSensor.MagnetOffset = PivotConstants.kCANcoderMagnetOffset; // needs physical mechanism to zero sensor
         m_cancoder.getConfigurator().apply(m_cancoderConfig);
 
@@ -55,6 +55,9 @@ public class PivotIOKraken implements PivotIO {
         m_config.Feedback.FeedbackRemoteSensorID = PivotConstants.kCANcoderID;
         m_config.Feedback.SensorToMechanismRatio = PivotConstants.kSensorToMechanismRatio; // ratio of axle turns to sensor turns, one
         m_config.Feedback.RotorToSensorRatio = PivotConstants.kMotorToPivotRatio; // based on gearbox, how many motor rotations make one pivot rotation
+
+        m_config.MotorOutput.Inverted = PivotConstants.kInverted;
+        m_config.MotorOutput.NeutralMode = PivotConstants.kNeutralMode;
 
         // feedforward!! (we all scream in unison)
         m_config.Slot0.kS = PivotConstants.kS;
@@ -71,6 +74,15 @@ public class PivotIOKraken implements PivotIO {
         m_config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = PivotConstants.kForwardPositionLimit;
         m_config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
         m_config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = PivotConstants.kBackwardPositionLimit;
+
+        // voltage and current limits 
+        m_config.Voltage.PeakForwardVoltage = PivotConstants.kPeakForwardVoltage;
+        m_config.Voltage.PeakReverseVoltage = PivotConstants.kPeakReverseVoltage;
+
+        m_config.CurrentLimits.SupplyCurrentLimit = PivotConstants.kSupplyCurrentLimit;
+        m_config.CurrentLimits.SupplyCurrentLimitEnable = true;
+        m_config.CurrentLimits.StatorCurrentLimit = PivotConstants.kStatorCurrentLimit;
+        m_config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
         // status signal setup
 

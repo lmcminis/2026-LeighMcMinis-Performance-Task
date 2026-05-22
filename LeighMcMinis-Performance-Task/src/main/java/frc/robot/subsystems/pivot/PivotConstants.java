@@ -1,5 +1,10 @@
 package frc.robot.subsystems.pivot;
 
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
+
 public class PivotConstants {
     // CAN ID
     public static final int kMotorID = 0;
@@ -7,11 +12,25 @@ public class PivotConstants {
 
     // cancoder
     public static final double kCANcoderMagnetOffset = 0; // find using physical robot
-    
+    public static final SensorDirectionValue kSensorDirection = SensorDirectionValue.CounterClockwise_Positive; // depends on orientation
     public static final double kMotorToPivotRatio = 0;  // gear ratio, cancoder ticks to radians
+    public static final double kSensorToMechanismRatio = 1; // cancoder is directly on the pivot, so 1:1 ratio
+
+    // soft limits
     public static final double kForwardPositionLimit = 0.25; // should not be greater than 0.25
     public static final double kBackwardPositionLimit = -0.25; // should not be less than -0.25
-    public static final double kSensorToMechanismRatio = 1; // cancoder is directly on the pivot, so 1:1 ratio
+
+    // voltage
+    public static final double kPeakForwardVoltage = 0; 
+    public static final double kPeakReverseVoltage = 0;
+
+    // values
+    public static final InvertedValue kInverted = InvertedValue.Clockwise_Positive; // depends on orientation
+    public static final NeutralModeValue kNeutralMode = NeutralModeValue.Brake;
+
+    // current limits
+    public static final int kSupplyCurrentLimit = 0;
+    public static final int kStatorCurrentLimit = 0;
 
     // magic motion
     public static final double MotionMagicCruiseVelocity = 0; // target cruise velocity
