@@ -4,10 +4,23 @@
 
 package frc.robot;
 
-import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.SystemConstants;
+import frc.robot.Constants.SystemConstants.RobotMode;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Superstructure;
+import frc.robot.subsystems.elevator.ElevatorConstants;
+import frc.robot.subsystems.elevator.ElevatorIODisabled;
+import frc.robot.subsystems.elevator.ElevatorIOKraken;
+import frc.robot.subsystems.elevator.ElevatorSubsystem;
+import frc.robot.subsystems.grabber.GrabberIODisabled;
+import frc.robot.subsystems.grabber.GrabberIOKraken;
+import frc.robot.subsystems.grabber.GrabberSubsystem;
+import frc.robot.subsystems.pivot.PivotIODisabled;
+import frc.robot.subsystems.pivot.PivotIOKraken;
+import frc.robot.subsystems.pivot.PivotSubsystem;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -19,17 +32,41 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
+  // the robot's subsystems and commands are defined here...
+  private final ElevatorSubsystem m_elevator;
+  private final GrabberSubsystem m_grabber;
+  private final PivotSubsystem m_pivot;
+  private final Superstructure m_superstructure;
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
-
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  // controller
+  private final CommandXboxController m_driverController = new CommandXboxController(Constants.ControllerConstants.kDriverControllerPort);
+  
+  // The container for the robot. Contains subsystems, OI devices, and commands.
   public RobotContainer() {
-    // Configure the trigger bindings
+    if (SystemConstants.kMode == RobotMode.REAL || RobotBase.isReal()) {
+      // using real io layers on real robot
+      this.m_elevator = new ElevatorSubsystem(new ElevatorIOKraken());
+      this.m_grabber = new GrabberSubsystem(new GrabberIOKraken());
+      this.m_pivot = new PivotSubsystem(new PivotIOKraken());
+    }
+    else {
+      // use sim/disabled on not real robot
+      this.m_elevator = new ElevatorSubsystem(new ElevatorIODisabled());
+      this.m_grabber = new GrabberSubsystem(new GrabberIODisabled());
+      this.m_pivot = new PivotSubsystem(new PivotIODisabled());
+    }
+
+    m_superstructure = new Superstructure(m_elevator, m_grabber, m_pivot);
+
     configureBindings();
+
+    configureDriverBindings();
+
+    configureOperatorBindings();
+
+    //m_superstructure.configureStateBasedBindings();
+    //registerNamedCommands();
+    
   }
 
   /**
@@ -50,6 +87,15 @@ public class RobotContainer {
     // cancelling on release.
     m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
   }
+
+  private void configureDriverBindings(){
+
+  }
+
+  private void configureOperatorBindings(){
+    
+  }
+
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

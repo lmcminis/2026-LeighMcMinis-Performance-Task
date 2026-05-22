@@ -14,7 +14,6 @@ public class GrabberConstants {
     // voltage
     public static final double kPeakForwardVoltage = 0; 
     public static final double kPeakReverseVoltage = 0;
-    public static final double holdVoltage = 0;
     public static final double kIntakeVoltage = 0;
     public static final double kHoldVoltage = 0;
     public static final double kReleaseVoltage = 0;
