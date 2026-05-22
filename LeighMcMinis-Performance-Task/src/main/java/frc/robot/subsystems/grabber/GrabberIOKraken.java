@@ -9,7 +9,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
+// import com.ctre.phoenix6.controls.right;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
@@ -24,29 +24,29 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-
 import frc.robot.subsystems.grabber.GrabberConstants;
 
 public class GrabberIOKraken implements GrabberIO {
-    private final TalonFX m_leader = new TalonFX(GrabberConstants.kLeaderID);
-    private final TalonFX m_follower = new TalonFX(GrabberConstants.kFollowerID);
+    private final TalonFX m_left = new TalonFX(GrabberConstants.kLeftID, GrabberConstants.kCANBus);
+    private final TalonFX m_right = new TalonFX(GrabberConstants.kRightID, GrabberConstants.kCANBus);
 
-    private final VoltageOut m_voltageRequest = new VoltageOut(0);
-    private final VelocityTorqueCurrentFOC m_velocityRequest = new VelocityTorqueCurrentFOC(0).withSlot(0);
+    private final VoltageOut m_LeftVoltageRequest = new VoltageOut(0);
+    private final VelocityTorqueCurrentFOC m_LeftVelocityRequest = new VelocityTorqueCurrentFOC(0).withSlot(0);
+
+    private final VoltageOut m_RightVoltageRequest = new VoltageOut(0);
+    private final VelocityTorqueCurrentFOC m_RightVelocityRequest = new VelocityTorqueCurrentFOC(0).withSlot(0);
     
-    private final Follower m_followerRequest = new Follower(GrabberConstants.kLeaderID, GrabberConstants.kFollowerAlignment);
-
     // status signals
-    private final StatusSignal<Voltage> m_leadVoltageSignal;
-    private final StatusSignal<AngularVelocity> m_leadVelocitySignal;
-    private final StatusSignal<Current> m_leadCurrentSignal;
-    private final StatusSignal<Current> m_leadStatorCurrentSignal;
-    private final StatusSignal<Temperature> m_leadTemperatureSignal;
-    private final StatusSignal<Voltage> m_followVoltageSignal;
-    private final StatusSignal<AngularVelocity> m_followVelocitySignal;
-    private final StatusSignal<Current> m_followCurrentSignal;
-    private final StatusSignal<Current> m_followStatorCurrentSignal;
-    private final StatusSignal<Temperature> m_followTemperatureSignal;
+    private final StatusSignal<Voltage> m_leftVoltageSignal;
+    private final StatusSignal<AngularVelocity> m_leftVelocitySignal;
+    private final StatusSignal<Current> m_leftCurrentSignal;
+    private final StatusSignal<Current> m_leftStatorCurrentSignal;
+    private final StatusSignal<Temperature> m_leftTemperatureSignal;
+    private final StatusSignal<Voltage> m_rightVoltageSignal;
+    private final StatusSignal<AngularVelocity> m_rightVelocitySignal;
+    private final StatusSignal<Current> m_rightCurrentSignal;
+    private final StatusSignal<Current> m_rightStatorCurrentSignal;
+    private final StatusSignal<Temperature> m_rightTemperatureSignal;
 
     public GrabberIOKraken() {
         TalonFXConfiguration m_config = new TalonFXConfiguration();
@@ -64,62 +64,80 @@ public class GrabberIOKraken implements GrabberIO {
 
         // status signal setup
 
-        m_leadVoltageSignal = m_leader.getMotorVoltage();
-        m_followVoltageSignal = m_follower.getMotorVoltage();
-        m_leadCurrentSignal = m_leader.getTorqueCurrent();
-        m_leadStatorCurrentSignal = m_leader.getStatorCurrent();
-        m_followCurrentSignal = m_follower.getTorqueCurrent();
-        m_followStatorCurrentSignal = m_follower.getStatorCurrent();
-        m_leadTemperatureSignal = m_leader.getDeviceTemp();
-        m_followTemperatureSignal = m_follower.getDeviceTemp();
-        m_leadVelocitySignal = m_leader.getVelocity();
-        m_followVelocitySignal = m_follower.getVelocity();
+        m_leftVoltageSignal = m_left.getMotorVoltage();
+        m_rightVoltageSignal = m_right.getMotorVoltage();
+        m_leftCurrentSignal = m_left.getTorqueCurrent();
+        m_leftStatorCurrentSignal = m_left.getStatorCurrent();
+        m_rightCurrentSignal = m_right.getTorqueCurrent();
+        m_rightStatorCurrentSignal = m_right.getStatorCurrent();
+        m_leftTemperatureSignal = m_left.getDeviceTemp();
+        m_rightTemperatureSignal = m_right.getDeviceTemp();
+        m_leftVelocitySignal = m_left.getVelocity();
+        m_rightVelocitySignal = m_right.getVelocity();
     
-        m_leader.getConfigurator().apply(m_config);
-        m_follower.getConfigurator().apply(m_config);
-        m_leader.optimizeBusUtilization();
-
-        m_follower.setControl(m_followerRequest);
+        m_left.getConfigurator().apply(m_config);
+        m_right.getConfigurator().apply(m_config.MotorOutput.withInverted(GrabberConstants.kOppositeInverted));
+        m_left.optimizeBusUtilization();
+        m_right.optimizeBusUtilization();
     }
 
-    public void setVoltage(double volts){
-        m_voltageRequest.withOutput(volts);
-        m_leader.setControl(m_voltageRequest);
+    public void setLeftVoltage(double volts){
+        m_LeftVoltageRequest.withOutput(volts);
+        m_left.setControl(m_LeftVoltageRequest);
     }
 
-    public void setVelocity(double radPerSec){
-        m_velocityRequest.withVelocity(radPerSec);
-        m_leader.setControl(m_velocityRequest);
+    public void setLeftVelocity(double radPerSec) {
+        if (radPerSec == 0) {
+            m_left.setVoltage(0);
+        } else {
+            m_LeftVelocityRequest.withVelocity(radPerSec);
+            m_left.setControl(m_LeftVelocityRequest);
+        }
+    }
+
+    public void setRightVoltage(double volts){
+        m_RightVoltageRequest.withOutput(volts);
+        m_right.setControl(m_RightVoltageRequest);
+    }
+
+    public void setRightVelocity(double radPerSec) {
+        if (radPerSec == 0) {
+            m_right.setVoltage(0);
+        } else {
+            m_RightVelocityRequest.withVelocity(radPerSec);
+            m_right.setControl(m_RightVelocityRequest);
+        }
     }
     
     public void updateInputs(GrabberIOInputs inputs){
         StatusSignal.refreshAll(
-            m_leadVoltageSignal,
-            m_followVoltageSignal,
-            m_leadCurrentSignal,
-            m_leadStatorCurrentSignal,
-            m_followCurrentSignal,
-            m_followStatorCurrentSignal,
-            m_leadTemperatureSignal,
-            m_followTemperatureSignal,
-            m_leadVelocitySignal,
-            m_followVelocitySignal
+            m_leftVoltageSignal,
+            m_rightVoltageSignal,
+            m_leftCurrentSignal,
+            m_leftStatorCurrentSignal,
+            m_rightCurrentSignal,
+            m_rightStatorCurrentSignal,
+            m_leftTemperatureSignal,
+            m_rightTemperatureSignal,
+            m_leftVelocitySignal,
+            m_rightVelocitySignal
         );
 
-        inputs.appliedVoltage[1] = m_leadVoltageSignal.getValueAsDouble();
-        inputs.appliedVoltage[2] = m_followVoltageSignal.getValueAsDouble();
-        inputs.currentAmps[1] = m_leadCurrentSignal.getValueAsDouble();
-        inputs.currentAmps[2] = m_followCurrentSignal.getValueAsDouble();
-        inputs.statorCurrentAmps[1] = m_leadStatorCurrentSignal.getValueAsDouble();
-        inputs.statorCurrentAmps[2] = m_followStatorCurrentSignal.getValueAsDouble();
-        inputs.motorTempDegreesC[1] = m_leadTemperatureSignal.getValueAsDouble();
-        inputs.motorTempDegreesC[2] = m_followTemperatureSignal.getValueAsDouble();
-        inputs.velocityRadiansPerSecond[1] =(m_leadVelocitySignal.getValueAsDouble()) * (2.0 * Math.PI);
-        inputs.velocityRadiansPerSecond[2] =(m_followVelocitySignal.getValueAsDouble()) * (2.0 * Math.PI);
+        inputs.appliedVoltage[0] = m_leftVoltageSignal.getValueAsDouble();
+        inputs.appliedVoltage[1] = m_rightVoltageSignal.getValueAsDouble();
+        inputs.currentAmps[0] = m_leftCurrentSignal.getValueAsDouble();
+        inputs.currentAmps[1] = m_rightCurrentSignal.getValueAsDouble();
+        inputs.statorCurrentAmps[0] = m_leftStatorCurrentSignal.getValueAsDouble();
+        inputs.statorCurrentAmps[1] = m_rightStatorCurrentSignal.getValueAsDouble();
+        inputs.motorTempDegreesC[0] = m_leftTemperatureSignal.getValueAsDouble();
+        inputs.motorTempDegreesC[1] = m_rightTemperatureSignal.getValueAsDouble();
+        inputs.velocityRadiansPerSecond[0] =(m_leftVelocitySignal.getValueAsDouble()) * (2.0 * Math.PI);
+        inputs.velocityRadiansPerSecond[1] =(m_rightVelocitySignal.getValueAsDouble()) * (2.0 * Math.PI);
     }
 
     @Override
     public void stop() {
-        this.setVoltage(0);
+        this.setLeftVoltage(0);
+        this.setRightVoltage(0);
     }
 }

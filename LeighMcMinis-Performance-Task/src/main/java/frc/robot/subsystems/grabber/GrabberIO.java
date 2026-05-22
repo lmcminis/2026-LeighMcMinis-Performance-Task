@@ -13,9 +13,13 @@ public interface GrabberIO {
         public double[] motorTempDegreesC = new double[2];
     }
 
-    public abstract void setVoltage(double volts);
+    public abstract void setLeftVoltage(double volts);
 
-    public abstract void setVelocity(double radPerSec);
+    public abstract void setLeftVelocity(double radPerSec);
+
+    public abstract void setRightVoltage(double volts);
+
+    public abstract void setRightVelocity(double radPerSec);
     
     public abstract void updateInputs(GrabberIOInputs inputs);
 

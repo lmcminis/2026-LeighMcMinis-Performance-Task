@@ -1,14 +1,18 @@
 package frc.robot.subsystems.pivot;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
+import frc.robot.Constants;
+
 public class PivotConstants {
     // CAN ID
     public static final int kMotorID = 0;
     public static final int kCANcoderID = 0;
+    public static final CANBus kCANBus = Constants.CANConstants.kRioBus;
 
     // cancoder
     public static final double kCANcoderMagnetOffset = 0; // find using physical robot

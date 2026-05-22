@@ -1,19 +1,19 @@
 package frc.robot.subsystems.elevator;
 
+import com.ctre.phoenix6.CANBus;
+
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import frc.robot.Constants;
 
 public class ElevatorConstants {
     public static final int kLeaderID = 0;
     public static final int kFollowerID = 0;
 
-    public static final MotorAlignmentValue kFollowerAlignment = MotorAlignmentValue.Opposed;
-    //public static final CANBus kCANBus = CANConstants.kRioBus;
-
-    // soft limits
-    public static final double kForwardPositionLimit = 0; // TODO: CALCULATE
-    public static final double kBackwardPositionLimit = 0; // TODO: CALCULATE
+    public static final MotorAlignmentValue kFollowerAlignment = MotorAlignmentValue.Opposed; // invert follow motor from lead motor
+    public static final CANBus kCANBus = Constants.CANConstants.kRioBus;
 
     // voltage
     public static final double kPeakForwardVoltage = 0; 
@@ -46,4 +46,9 @@ public class ElevatorConstants {
     public static final double kDrumPitchDiameter = 0;
     public static final double kStages = 3; // three stage elevator
     public static final double kMetersPerDrumRotation = kDrumPitchDiameter * Math.PI * kStages;
+
+    // soft limits
+    public static final double slackMargin = 0.1; // leeway in position limits for safety
+    public static final double kForwardPositionLimit = (4.5 - slackMargin) / ((1/kSensorToMechanismRatio)*(Math.PI * kDrumPitchDiameter) * kStages);
+    public static final double kBackwardPositionLimit = slackMargin;
 }

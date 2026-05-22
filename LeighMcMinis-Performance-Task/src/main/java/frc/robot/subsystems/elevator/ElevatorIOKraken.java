@@ -28,8 +28,8 @@ import edu.wpi.first.units.measure.Voltage;
 
 public class ElevatorIOKraken implements ElevatorIO{
     // creation
-    private final TalonFX m_leader = new TalonFX(ElevatorConstants.kLeaderID);
-    private final TalonFX m_follower = new TalonFX(ElevatorConstants.kFollowerID);
+    private final TalonFX m_leader = new TalonFX(ElevatorConstants.kLeaderID, ElevatorConstants.kCANBus);
+    private final TalonFX m_follower = new TalonFX(ElevatorConstants.kFollowerID, ElevatorConstants.kCANBus);
 
     // magic motion
     private final MotionMagicVoltage m_positionRequest = new MotionMagicVoltage(0).withSlot(0);
@@ -128,14 +128,14 @@ public class ElevatorIOKraken implements ElevatorIO{
             m_followPositionSignal
         );
 
-        inputs.appliedVoltage[1] = m_leadVoltageSignal.getValueAsDouble();
-        inputs.appliedVoltage[2] = m_followVoltageSignal.getValueAsDouble();
-        inputs.currentAmps[1] = m_leadCurrentSignal.getValueAsDouble();
-        inputs.currentAmps[2] = m_followCurrentSignal.getValueAsDouble();
-        inputs.statorCurrentAmps[1] = m_leadStatorCurrentSignal.getValueAsDouble();
-        inputs.statorCurrentAmps[2] = m_followStatorCurrentSignal.getValueAsDouble();
-        inputs.motorTempDegreesC[1] = m_leadTemperatureSignal.getValueAsDouble();
-        inputs.motorTempDegreesC[2] = m_followTemperatureSignal.getValueAsDouble();
+        inputs.appliedVoltage[0] = m_leadVoltageSignal.getValueAsDouble();
+        inputs.appliedVoltage[1] = m_followVoltageSignal.getValueAsDouble();
+        inputs.currentAmps[0] = m_leadCurrentSignal.getValueAsDouble();
+        inputs.currentAmps[1] = m_followCurrentSignal.getValueAsDouble();
+        inputs.statorCurrentAmps[0] = m_leadStatorCurrentSignal.getValueAsDouble();
+        inputs.statorCurrentAmps[1] = m_followStatorCurrentSignal.getValueAsDouble();
+        inputs.motorTempDegreesC[0] = m_leadTemperatureSignal.getValueAsDouble();
+        inputs.motorTempDegreesC[1] = m_followTemperatureSignal.getValueAsDouble();
         inputs.velocityMetersPerSecond = rotationsToMeters(m_leadVelocitySignal.getValueAsDouble());
         inputs.positionMeters = rotationsToMeters(m_leadPositionSignal.getValueAsDouble());
 

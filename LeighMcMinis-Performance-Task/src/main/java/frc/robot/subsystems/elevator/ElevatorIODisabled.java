@@ -16,8 +16,8 @@ public class ElevatorIODisabled implements ElevatorIO {
 
     @Override
     public void updateInputs(ElevatorIOInputs inputs){
+        inputs.appliedVoltage[0] = targetVoltage;
         inputs.appliedVoltage[1] = targetVoltage;
-        inputs.appliedVoltage[2] = targetVoltage;
         inputs.positionMeters = targetPosition;
         
     }

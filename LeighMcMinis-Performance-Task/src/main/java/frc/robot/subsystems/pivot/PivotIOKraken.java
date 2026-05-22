@@ -26,8 +26,8 @@ import edu.wpi.first.units.measure.Voltage;
 
 public class PivotIOKraken implements PivotIO {
     // creation
-    private final TalonFX m_motor = new TalonFX(PivotConstants.kMotorID);
-    private final CANcoder m_cancoder = new CANcoder(PivotConstants.kCANcoderID);
+    private final TalonFX m_motor = new TalonFX(PivotConstants.kMotorID, PivotConstants.kCANBus);
+    private final CANcoder m_cancoder = new CANcoder(PivotConstants.kCANcoderID, PivotConstants.kCANBus);
 
     // control requests 
     private final MotionMagicVoltage m_positionRequest = new MotionMagicVoltage(0).withSlot(0);

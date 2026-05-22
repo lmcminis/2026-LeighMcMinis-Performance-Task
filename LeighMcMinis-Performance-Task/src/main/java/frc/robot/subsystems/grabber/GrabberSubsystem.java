@@ -22,29 +22,49 @@ public class GrabberSubsystem extends SubsystemBase{
     Logger.processInputs("Grabber", inputs);
     }
 
-    public double getStatorCurrent() {
+    public double getLeftStatorCurrent() {
+        return inputs.statorCurrentAmps[0];
+    }
+
+    public double getRightStatorCurrent() {
         return inputs.statorCurrentAmps[1];
     }
 
-    public double getVelocity() {
+    public double getLeftVelocity() {
+        return inputs.velocityRadiansPerSecond[0];
+    }
+
+    public double getRightVelocity() {
         return inputs.velocityRadiansPerSecond[1];
     }
 
-    public void setVoltage(double volts) {
-        inputs.appliedVoltage[1] = volts;
-        inputs.appliedVoltage[2] = volts;
+    public void setLeftVoltage(double volts) {
+        inputs.appliedVoltage[0] = volts;
     }
 
-    //public Command intakeCommand() {
-    //    return run(() -> io.setVoltage(GrabberConstants.kIntakeVoltage)).finallyDo(interrupted -> io.stop());
-    //}
+    public void setRightVoltage(double volts) {
+        inputs.appliedVoltage[1] = volts;
+    }
 
-    //public Command holdCommand() {
-    //    return run(() -> io.setVoltage(GrabberConstants.kHoldVoltage)).finallyDo(interrupted -> io.stop());
-    //}
+    public Command intakeCommand() {
+        return run(() -> { 
+        io.setLeftVoltage(GrabberConstants.kIntakeVoltage);
+        io.setRightVoltage(GrabberConstants.kIntakeVoltage);
+        }).finallyDo(interrupted -> io.stop());
+    }
 
-    //public Command releaseCommand() {
-    //    return run(() -> io.setVoltage(GrabberConstants.kReleaseVoltage)).withTimeout(0.3).andThen(runOnce (io::stop));
-    //}
+    public Command holdCommand() {
+        return run(() -> { 
+        io.setLeftVoltage(GrabberConstants.kHoldVoltage);
+        io.setRightVoltage(GrabberConstants.kHoldVoltage);
+        }).finallyDo(interrupted -> io.stop());
+    }
+
+    public Command releaseCommand() {
+        return run(() -> { 
+        io.setLeftVoltage(GrabberConstants.kReleaseVoltage);
+        io.setRightVoltage(GrabberConstants.kReleaseVoltage);
+        }).withTimeout(0.3).andThen(runOnce (io::stop));
+    }
     
 }
