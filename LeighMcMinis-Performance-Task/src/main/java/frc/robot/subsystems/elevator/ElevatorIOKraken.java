@@ -25,8 +25,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.subsystems.elevator.ElevatorConstants;
-import frc.robot.subsystems.pivot.PivotConstants;
 
 public class ElevatorIOKraken implements ElevatorIO{
     // creation
@@ -61,13 +59,13 @@ public class ElevatorIOKraken implements ElevatorIO{
 
 
         // feedforward!! (we all scream in unison)
-        m_config.Slot0.kS = PivotConstants.kS;
-        m_config.Slot0.kV = PivotConstants.kV; 
-        m_config.Slot0.kA = PivotConstants.kA;
-        m_config.Slot0.kG = PivotConstants.kG;
-        m_config.Slot0.kP = PivotConstants.kP;
-        m_config.Slot0.kI = PivotConstants.kI;
-        m_config.Slot0.kD = PivotConstants.kD;
+        m_config.Slot0.kS = ElevatorConstants.kS;
+        m_config.Slot0.kV = ElevatorConstants.kV; 
+        m_config.Slot0.kA = ElevatorConstants.kA;
+        m_config.Slot0.kG = ElevatorConstants.kG;
+        m_config.Slot0.kP = ElevatorConstants.kP;
+        m_config.Slot0.kI = ElevatorConstants.kI;
+        m_config.Slot0.kD = ElevatorConstants.kD;
         m_config.Slot0.GravityType = GravityTypeValue.Elevator_Static;
 
         // voltage and current limits
@@ -102,9 +100,9 @@ public class ElevatorIOKraken implements ElevatorIO{
     
         // set motion magic settings
         var motionMagicConfigs = m_config.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = PivotConstants.MotionMagicCruiseVelocity;
-        motionMagicConfigs.MotionMagicAcceleration = PivotConstants.MotionMagicAcceleration;
-        motionMagicConfigs.MotionMagicJerk = PivotConstants.MotionMagicJerk; 
+        motionMagicConfigs.MotionMagicCruiseVelocity = ElevatorConstants.MotionMagicCruiseVelocity;
+        motionMagicConfigs.MotionMagicAcceleration = ElevatorConstants.MotionMagicAcceleration;
+        motionMagicConfigs.MotionMagicJerk = ElevatorConstants.MotionMagicJerk; 
 
         m_leader.getConfigurator().apply(m_config);
         m_follower.getConfigurator().apply(m_config);

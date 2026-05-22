@@ -39,6 +39,7 @@ public class PivotIOKraken implements PivotIO {
     private final StatusSignal<Temperature> m_motorTemperatureSignal;
     private final StatusSignal<AngularVelocity> m_velocitySignal;
     private final StatusSignal<Angle> m_motorPositionSignal;
+    private final StatusSignal<Current> m_motorStatorCurrentSignal;
 
     public PivotIOKraken() {
         // cancoder plus config
@@ -85,12 +86,12 @@ public class PivotIOKraken implements PivotIO {
         m_config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
         // status signal setup
-
         m_motorVoltageSignal = m_motor.getMotorVoltage();
         m_motorCurrentSignal = m_motor.getTorqueCurrent();
         m_motorTemperatureSignal = m_motor.getDeviceTemp();
         m_velocitySignal = m_motor.getVelocity();
         m_motorPositionSignal = m_motor.getPosition();
+        m_motorStatorCurrentSignal = m_motor.getStatorCurrent();
     
         // set motion magic settings
         var motionMagicConfigs = m_config.MotionMagic;
@@ -122,7 +123,8 @@ public class PivotIOKraken implements PivotIO {
             m_motorCurrentSignal,
             m_motorTemperatureSignal,
             m_motorVoltageSignal,
-            m_velocitySignal
+            m_velocitySignal,
+            m_motorStatorCurrentSignal
         );
         
         inputs.appliedVoltage = m_motorVoltageSignal.getValueAsDouble();
@@ -130,6 +132,7 @@ public class PivotIOKraken implements PivotIO {
         inputs.angleRadians = m_motorPositionSignal.getValueAsDouble();
         inputs.velocityRadiansPerSecond = m_velocitySignal.getValueAsDouble() * (2.0 * Math.PI);
         inputs.motorTempDegreesC = m_motorTemperatureSignal.getValueAsDouble();
+        inputs.statorCurrentAmps = m_motorStatorCurrentSignal.getValueAsDouble();
     }
 
 }

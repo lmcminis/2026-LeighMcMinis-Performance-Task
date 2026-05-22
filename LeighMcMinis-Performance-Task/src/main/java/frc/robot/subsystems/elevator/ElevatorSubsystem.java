@@ -12,9 +12,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.subsystems.pivot.PivotConstants;
-import frc.robot.subsystems.pivot.PivotIO;
-import frc.robot.subsystems.pivot.PivotIOInputsAutoLogged;
 
 public class ElevatorSubsystem extends SubsystemBase{
     private final ElevatorIO io;

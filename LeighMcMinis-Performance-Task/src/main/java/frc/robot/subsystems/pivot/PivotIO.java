@@ -8,6 +8,7 @@ public interface PivotIO {
     public static class PivotIOInputs {
         public double appliedVoltage = 0;
         public double currentAmps = 0;
+        public double statorCurrentAmps = 0;
         public double motorTempDegreesC = 0;
 
         public double velocityRadiansPerSecond = 0;
