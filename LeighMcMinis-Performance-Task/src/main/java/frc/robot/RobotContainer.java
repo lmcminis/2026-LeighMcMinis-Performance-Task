@@ -22,7 +22,9 @@ import frc.robot.subsystems.pivot.PivotIOKraken;
 import frc.robot.subsystems.pivot.PivotSubsystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -39,7 +41,8 @@ public class RobotContainer {
   private final Superstructure m_superstructure;
 
   // controller
-  private final CommandXboxController m_driverController = new CommandXboxController(Constants.ControllerConstants.kDriverControllerPort);
+  private final CommandPS5Controller m_driverController = new CommandPS5Controller(Constants.ControllerConstants.kDriverControllerPort);
+  private final CommandXboxController m_operatorController = new CommandXboxController(Constants.ControllerConstants.kDriverControllerPort);
   
   // The container for the robot. Contains subsystems, OI devices, and commands.
   public RobotContainer() {
@@ -64,8 +67,7 @@ public class RobotContainer {
 
     configureOperatorBindings();
 
-    //m_superstructure.configureStateBasedBindings();
-    //registerNamedCommands();
+    //getAutonomousCommand();
     
   }
 
@@ -79,21 +81,41 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(m_exampleSubsystem));
+    // bindings go here
 
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
   }
 
-  private void configureDriverBindings(){
+  private void configureDriverBindings() {
+
+    // score at level one
+    m_driverController.triangle()
+      .onTrue(m_superstructure.L1());
+
+    // score at level two
+    m_driverController.square()
+      .onTrue(m_superstructure.L2());
+
+    // score at level three
+    m_driverController.circle()
+      .onTrue(m_superstructure.L3());
+
+    // score at level four
+    m_driverController.cross()
+      .onTrue(m_superstructure.L4());
+
+    // human player intake
+    m_driverController.L1()
+      .whileTrue(m_superstructure.Intake());
+
+    // throws at high speed
+    m_driverController.R1()
+      .whileTrue(m_superstructure.Throw());
 
   }
 
   private void configureOperatorBindings(){
-    
+    // operator controller bindings go here
+  
   }
 
 
@@ -102,8 +124,8 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    return Autos.exampleAuto(m_exampleSubsystem);
-  }
+  
+  //public Command getAutonomousCommand() {
+  //  return m_elastic.getSelectedAutonomousCommand();
+  //}
 }

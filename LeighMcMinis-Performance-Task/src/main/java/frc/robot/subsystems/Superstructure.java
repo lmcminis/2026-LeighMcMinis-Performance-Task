@@ -87,7 +87,13 @@ public class Superstructure {
     }
 
     public Command Intake() {
-        
+
+        return Commands.parallel(
+            m_elevator.setPosition(1.5),
+            m_pivot.setAngle(Math.PI / 3),
+            m_grabber.holdCommand(-6, -6) // add timer
+        );
+    
     }
 
     public Command Throw() {

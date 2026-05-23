@@ -46,13 +46,7 @@ public class GrabberSubsystem extends SubsystemBase{
         inputs.appliedVoltage[1] = volts;
     }
 
-    public Command intakeCommand(double leftVoltage, double rightVoltage) {
-        return run(() -> { 
-        io.setLeftVoltage(leftVoltage);
-        io.setRightVoltage(rightVoltage);
-        }).finallyDo(interrupted -> io.stop());
-    }
-
+    // hold and intake are the same, use hold to intake
     public Command holdCommand(double leftVoltage, double rightVoltage) {
         return run(() -> { 
         io.setLeftVoltage(leftVoltage);
