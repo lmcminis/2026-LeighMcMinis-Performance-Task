@@ -12,8 +12,9 @@ import org.littletonrobotics.junction.AutoLogOutput;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
+import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.grabber.GrabberConstants;
 import frc.robot.subsystems.grabber.GrabberSubsystem;
@@ -62,25 +63,25 @@ public class Superstructure {
     }
 
     public Command L2() {
-        return Commands.parallel(
-            m_pivot.setAngle(-1 * (Math.PI / 6.0)),
+        return Commands.sequence(
             m_elevator.setPosition(2),
+            m_pivot.setAngle(-1 * (Math.PI / 6.0)),
             m_grabber.releaseCommand(4,4)
         );
     }
 
     public Command L3() {
-        return Commands.parallel(
-            m_pivot.setAngle(-1 * (Math.PI / 6.0)),
+        return Commands.sequence(
             m_elevator.setPosition(3),
+            m_pivot.setAngle(-1 * (Math.PI / 6.0)),
             m_grabber.releaseCommand(4,4)
         );
     }
 
     public Command L4() {
         return Commands.sequence(
-            m_pivot.setAngle(-1 * (Math.PI / 3.0)),
             m_elevator.setPosition(4),
+            m_pivot.setAngle(-1 * (Math.PI / 3.0)),
             m_grabber.releaseCommand(4,4)
         );
     }
@@ -90,9 +91,25 @@ public class Superstructure {
     }
 
     public Command Throw() {
-        
+
+        if (m_elevator.getPosition() < 1) {
+            return Commands.parallel(
+                m_pivot.setAngle((2 * Math.PI) / 3.0),
+                m_elevator.setPosition(ElevatorConstants.kForwardPositionLimit),
+                Commands.waitUntil(() -> (m_elevator.getVelocity() > 2.0 && m_elevator.getPosition() > 3.5))
+                .andThen(m_grabber.releaseCommand(12,12))
+            );
+        }
+        else {
+            return Commands.sequence(
+                m_elevator.setPosition(1),
+                Commands.parallel(
+                    m_pivot.setAngle((2 * Math.PI) / 3.0),
+                    m_elevator.setPosition(ElevatorConstants.kForwardPositionLimit),
+                    Commands.waitUntil(() -> (m_elevator.getVelocity() > 2.0 && m_elevator.getPosition() > 3.5))
+                    .andThen(m_grabber.releaseCommand(12,12))
+                )
+            );
+        }
     }
-
-
-    
 }
