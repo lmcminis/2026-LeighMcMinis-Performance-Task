@@ -67,6 +67,8 @@ public class RobotContainer {
 
     configureOperatorBindings();
 
+    m_superstructure.RezeroElevator(); // resets elevator encoder
+
     //getAutonomousCommand();
     
   }

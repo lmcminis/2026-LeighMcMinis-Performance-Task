@@ -53,6 +53,10 @@ public class ElevatorSubsystem extends SubsystemBase{
         return inputs.velocityMetersPerSecond;
     }
 
+    public double getStatorCurrentMax() {
+        return Math.max(inputs.statorCurrentAmps[0], inputs.statorCurrentAmps[1]);
+    }
+
     public Command setVoltage(double volts) {
         return Commands.runOnce(
             () -> io.setVoltage(volts),
@@ -65,6 +69,10 @@ public class ElevatorSubsystem extends SubsystemBase{
             () -> io.setPosition(MathUtil.clamp(meters, ElevatorConstants.kBackwardPositionLimit, ElevatorConstants.kForwardPositionLimit)),
             this
         );
+    }
+
+    public void resetEncoder() {
+        io.resetEncoder();
     }
 
     public Command stop() {

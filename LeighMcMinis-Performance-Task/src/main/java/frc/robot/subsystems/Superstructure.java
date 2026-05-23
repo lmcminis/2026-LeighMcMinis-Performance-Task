@@ -10,6 +10,7 @@ import java.util.function.BooleanSupplier;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -87,14 +88,17 @@ public class Superstructure {
     }
 
     public Command Intake() {
-
-        return Commands.parallel(
-            m_elevator.setPosition(1.5),
-            m_pivot.setAngle(Math.PI / 3),
-            m_grabber.holdCommand(-6, -6) // add timer
-        );
-    
-    }
+        Debouncer debounce = new Debouncer(0.02, Debouncer.DebounceType.kRising);
+        return Commands.sequence(
+            Commands.parallel (
+                m_elevator.setPosition(1.5),
+                m_pivot.setAngle(Math.PI / 3)
+            ),
+            Commands.run(() -> m_grabber.holdCommand(-6, -6))
+                .until(() -> debounce.calculate(Math.max(m_grabber.getLeftStatorCurrent(),m_grabber.getRightStatorCurrent()) > 10))
+                .andThen(() -> m_grabber.stop())
+            );
+    };
 
     public Command Throw() {
 
@@ -117,5 +121,15 @@ public class Superstructure {
                 )
             );
         }
+    }
+
+    public Command RezeroElevator() {
+        return Commands.sequence(
+            m_pivot.setAngle(0),
+            m_elevator.setVoltage(-1),
+            Commands.waitUntil(() -> (m_elevator.getStatorCurrentMax() > 10.0)), // waits until spike in amps
+            m_elevator.stop(),
+            Commands.run (() -> m_elevator.resetEncoder())
+        );
     }
 }
